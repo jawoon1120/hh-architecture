@@ -48,7 +48,7 @@ export class EnrollmentService implements IEnrollmentService {
 
     const isDupLecture = existedUsersEnrollments.some(
       (usersEnrollment) =>
-        usersEnrollment.scheduleId === existedSchedule.lectureId,
+        usersEnrollment.lectureId === existedSchedule.lectureId,
     );
     if (isDupLecture) {
       throw new BadRequestException(
