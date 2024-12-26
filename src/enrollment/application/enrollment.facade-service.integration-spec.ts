@@ -80,6 +80,69 @@ describe('EnrollmentFacadeService Integration Test', () => {
       expect(actualEnrollments).toHaveLength(30);
     }, 50000); // 타임아웃 30초로 설정
   });
+
+  describe('중복 신청 테스트', () => {
+    it('동일한 사용자가 같은 스케줄에 중복 신청시 실패해야 함', async () => {
+      // Given
+      const userId = 999;
+      const scheduleId = 1;
+
+      // When: 5번 동시 신청
+      const enrollmentPromises = Array(5)
+        .fill(null)
+        .map(() => enrollmentFacadeService.enroll(userId, scheduleId));
+
+      const results = await Promise.allSettled(enrollmentPromises);
+
+      // Then;
+      const successfulEnrollments = results.filter(
+        (result) => result.status === 'fulfilled',
+      );
+      const failedEnrollments = results.filter(
+        (result) => result.status === 'rejected',
+      );
+      console.log(successfulEnrollments);
+      console.log(failedEnrollments);
+      // 정확히 1번만 성공해야 함
+      expect(successfulEnrollments).toHaveLength(1);
+      // 나머지 4번은 실패해야 함
+      expect(failedEnrollments).toHaveLength(4);
+
+      // DB에서 최종 상태 확인
+      const enrollments = await dataSource.getRepository(Enrollment).find({
+        where: {
+          userId: userId,
+          scheduleId: scheduleId,
+        },
+      });
+
+      // DB에도 하나의 신청만 존재해야 함
+      expect(enrollments).toHaveLength(1);
+    });
+
+    afterEach(async () => {
+      // 테스트 데이터 정리
+      await dataSource
+        .getRepository(Enrollment)
+        .createQueryBuilder()
+        .delete()
+        .where('user_id = :userId', { userId: 999 })
+        .execute();
+
+      // schedule 상태 초기화
+      await dataSource
+        .getRepository(Schedule)
+        .createQueryBuilder()
+        .update()
+        .set({
+          currentEnrollmentCount: 0,
+          status: SCHEDULE_STATUS.OPEN_SEATS,
+        })
+        .where('id = :id', { id: 1 })
+        .execute();
+    });
+  });
+
   afterAll(async () => {
     await dataSource.destroy();
   });
