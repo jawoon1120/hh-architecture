@@ -32,6 +32,17 @@ export class EnrollmentRepository
       if (schedule.currentEnrollmentCount >= schedule.enrollmentCapacity) {
         throw new BadRequestException('Schedule is full');
       }
+
+      // enrollment에 대한 비관적 락 설정
+      const existingEnrollment = await manager.findOne(Enrollment, {
+        where: { userId: enrollment.userId, scheduleId: enrollment.scheduleId },
+        lock: { mode: 'pessimistic_read' },
+      });
+
+      if (existingEnrollment) {
+        throw new BadRequestException('Enrollment already exists');
+      }
+
       // 수강 인원 증가 및 상태 업데이트
       schedule.currentEnrollmentCount += 1;
       await manager.save(schedule);
