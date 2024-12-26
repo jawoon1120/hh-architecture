@@ -1,7 +1,7 @@
 import { Enrollment } from '../../domain/enrollment.entity';
 
 export interface IEnrollmentService {
-  validScheduleIsFull(scheduleId: number): Promise<boolean>;
+  validEnrollment(userId: number, scheduleId: number): Promise<void>;
   enroll(userId: number, scheduleId: number): Promise<Enrollment>;
 }
 

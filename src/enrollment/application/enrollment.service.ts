@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 
 import { Enrollment } from '../domain/enrollment.entity';
@@ -22,11 +22,39 @@ export class EnrollmentService implements IEnrollmentService {
     private scheduleService: IScheduleService,
   ) {}
 
-  async validScheduleIsFull(scheduleId: number): Promise<boolean> {
-    const existedEnrollments =
+  async validEnrollment(userId: number, scheduleId: number): Promise<void> {
+    const existedEnrollmentsAboutSchedule =
       await this.enrollmentRepository.findByScheduleId(scheduleId);
     const existedSchedule = await this.scheduleService.findById(scheduleId);
-    return existedEnrollments.length >= existedSchedule.enrollmentCapacity;
+    const existedUsersEnrollments =
+      await this.enrollmentRepository.findByUserId(userId);
+
+    const isFull =
+      existedEnrollmentsAboutSchedule.length >=
+      existedSchedule.enrollmentCapacity;
+
+    if (isFull) {
+      throw new BadRequestException('Schedule is full');
+    }
+
+    const isDupEnrollment = existedEnrollmentsAboutSchedule.some(
+      (scheduleEnrollment) => scheduleEnrollment.userId === userId,
+    );
+    if (isDupEnrollment) {
+      throw new BadRequestException(
+        'Enrollment already exists in this schedule',
+      );
+    }
+
+    const isDupLecture = existedUsersEnrollments.some(
+      (usersEnrollment) =>
+        usersEnrollment.scheduleId === existedSchedule.lectureId,
+    );
+    if (isDupLecture) {
+      throw new BadRequestException(
+        'Enrollment already exists in this lecture',
+      );
+    }
   }
 
   async enroll(userId: number, scheduleId: number): Promise<Enrollment> {

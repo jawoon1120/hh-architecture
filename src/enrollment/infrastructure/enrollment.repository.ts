@@ -15,7 +15,10 @@ export class EnrollmentRepository
     return this.save(enrollment);
   }
   findByScheduleId(scheduleId: number): Promise<Enrollment[]> {
-    return this.findBy({ scheduleId });
+    return this.find({ where: { scheduleId } });
+  }
+  findByUserId(userId: number): Promise<Enrollment[]> {
+    return this.find({ where: { userId } });
   }
   findByScheduleIdAndUserId(
     scheduleId: number,

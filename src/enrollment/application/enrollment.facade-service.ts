@@ -24,10 +24,7 @@ export class EnrollmentFacadeService implements IEnrollmentFacadeService {
 
   @Transactional()
   async enroll(userId: number, scheduleId: number): Promise<Enrollment> {
-    const isFull = await this.enrollmentService.validScheduleIsFull(scheduleId);
-    if (isFull) {
-      throw new Error('Schedule is full');
-    }
+    await this.enrollmentService.validEnrollment(userId, scheduleId);
 
     const enrolledEnrollment = await this.enrollmentService.enroll(
       userId,
