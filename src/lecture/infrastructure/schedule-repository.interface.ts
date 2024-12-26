@@ -10,7 +10,7 @@ export interface IScheduleRepository {
     scheduleId: number,
     status: SCHEDULE_STATUS,
     enrollmentCount: number,
-  ): Promise<void>;
+  ): Promise<number>;
 }
 
 export const SCHDULE_REPOSITORY = Symbol('SCHDULE_REPOSITORY');

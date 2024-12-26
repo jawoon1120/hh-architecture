@@ -25,7 +25,7 @@ export class ScheduleService implements IScheduleService {
   async updateScheduleStatusAndEnrollmentCount(
     scheduleId: number,
     currentEnrollmentCount: number,
-  ): Promise<void> {
+  ): Promise<number> {
     const schedule = await this.findById(scheduleId);
 
     if (!schedule) {

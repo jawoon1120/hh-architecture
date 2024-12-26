@@ -39,10 +39,12 @@ export class ScheduleRepository
     scheduleId: number,
     status: SCHEDULE_STATUS,
     currentEnrollmentCount: number,
-  ): Promise<void> {
-    await this.update(scheduleId, {
+  ): Promise<number> {
+    const result = await this.update(scheduleId, {
       status,
       currentEnrollmentCount,
     });
+
+    return result.affected;
   }
 }

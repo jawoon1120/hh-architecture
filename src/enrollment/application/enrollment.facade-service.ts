@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import {
   IEnrollmentService,
@@ -31,20 +31,28 @@ export class EnrollmentFacadeService implements IEnrollmentFacadeService {
     try {
       await this.enrollmentService.validEnrollment(userId, scheduleId);
 
-      const enrolledEnrollment = await this.enrollmentService.enroll(
+      const addedEnrollment = await this.enrollmentService.enroll(
         userId,
         scheduleId,
       );
 
       const schedule = await this.scheduleService.findById(scheduleId);
+      if (!schedule) {
+        throw new BadRequestException('schedule is not found');
+      }
 
-      await this.scheduleService.updateScheduleStatusAndEnrollmentCount(
-        scheduleId,
-        schedule.currentEnrollmentCount + 1,
-      );
+      const updatedSchedule =
+        await this.scheduleService.updateScheduleStatusAndEnrollmentCount(
+          scheduleId,
+          schedule.currentEnrollmentCount + 1,
+        );
+
+      if (updatedSchedule === 0) {
+        throw new BadRequestException('Update schedule failed');
+      }
 
       await queryRunner.commitTransaction();
-      return enrolledEnrollment;
+      return addedEnrollment;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
