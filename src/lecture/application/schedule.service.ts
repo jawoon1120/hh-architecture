@@ -24,7 +24,6 @@ export class ScheduleService implements IScheduleService {
 
   async updateScheduleStatusAndEnrollmentCount(
     scheduleId: number,
-    currentEnrollmentCount: number,
   ): Promise<number> {
     const schedule = await this.findById(scheduleId);
 
@@ -34,10 +33,10 @@ export class ScheduleService implements IScheduleService {
 
     return await this.scheduleRepository.updateScheduleStatusAndEnrollmentCount(
       scheduleId,
-      currentEnrollmentCount >= schedule.enrollmentCapacity
+      schedule.currentEnrollmentCount >= schedule.enrollmentCapacity
         ? SCHEDULE_STATUS.FULL
         : SCHEDULE_STATUS.OPEN_SEATS,
-      currentEnrollmentCount,
+      schedule.currentEnrollmentCount,
     );
   }
 
