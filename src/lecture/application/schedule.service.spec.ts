@@ -91,17 +91,14 @@ describe('ScheduleService', () => {
         lectureStartedAt: new Date(),
         lectureEndedAt: new Date(),
         enrollmentCapacity: 30,
-        currentEnrollmentCount: 29,
+        currentEnrollmentCount: 30,
         status: SCHEDULE_STATUS.OPEN_SEATS,
       });
 
       mockScheduleRepository.findById.mockResolvedValue(mockSchedule);
 
       // When
-      await service.updateScheduleStatusAndEnrollmentCount(
-        scheduleId,
-        currentEnrollmentCount,
-      );
+      await service.updateScheduleStatusAndEnrollmentCount(scheduleId);
 
       // Then
       expect(
@@ -116,7 +113,7 @@ describe('ScheduleService', () => {
     it('수강 인원이 여유가 있을 때 상태가 OPEN_SEATS로 변경되어야 함', async () => {
       // Given
       const scheduleId = 1;
-      const currentEnrollmentCount = 29;
+      const currentEnrollmentCount = 28;
       const mockSchedule = new Schedule({
         id: scheduleId,
         lectureId: 1,
@@ -130,10 +127,7 @@ describe('ScheduleService', () => {
       mockScheduleRepository.findById.mockResolvedValue(mockSchedule);
 
       // When
-      await service.updateScheduleStatusAndEnrollmentCount(
-        scheduleId,
-        currentEnrollmentCount,
-      );
+      await service.updateScheduleStatusAndEnrollmentCount(scheduleId);
 
       // Then
       expect(
@@ -148,16 +142,12 @@ describe('ScheduleService', () => {
     it('스케줄이 존재하지 않을 때 예외를 던져야 함', async () => {
       // Given
       const scheduleId = 999;
-      const currentEnrollmentCount = 1;
 
       mockScheduleRepository.findById.mockResolvedValue(null);
 
       // When & Then
       await expect(
-        service.updateScheduleStatusAndEnrollmentCount(
-          scheduleId,
-          currentEnrollmentCount,
-        ),
+        service.updateScheduleStatusAndEnrollmentCount(scheduleId),
       ).rejects.toThrow('Schedule not found');
     });
   });

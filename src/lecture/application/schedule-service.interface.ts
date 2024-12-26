@@ -4,10 +4,7 @@ import { AvailableScheduleDto } from './dto/available-schedule.dto';
 export interface IScheduleService {
   findById(id: number): Promise<Schedule>;
   findByDate(date: Date): Promise<Schedule[]>;
-  updateScheduleStatusAndEnrollmentCount(
-    scheduleId: number,
-    currentEnrollmentCount: number,
-  ): Promise<number>;
+  updateScheduleStatusAndEnrollmentCount(scheduleId: number): Promise<number>;
   findEnrollAvailableSchedule(
     targetDate: Date,
     userId: number,
