@@ -1,4 +1,5 @@
 import { Schedule } from '../domain/schedule.entity';
+import { AvailableScheduleDto } from './dto/available-schedule.dto';
 
 export interface IScheduleService {
   // status 변경시
@@ -10,6 +11,10 @@ export interface IScheduleService {
     scheduleId: number,
     currentEnrollmentCount: number,
   ): Promise<void>;
+  findEnrollAvailableSchedule(
+    targetDate: Date,
+    userId: number,
+  ): Promise<AvailableScheduleDto[]>;
 }
 
 export const SCHDULE_SERVICE = Symbol('SCHDULE_SERVICE');

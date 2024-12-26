@@ -6,6 +6,7 @@ import {
 import { IScheduleService } from './schedule-service.interface';
 import { Schedule } from '../domain/schedule.entity';
 import { SCHEDULE_STATUS } from '../domain/schedule-status.enum';
+import { AvailableScheduleDto } from './dto/available-schedule.dto';
 
 @Injectable()
 export class ScheduleService implements IScheduleService {
@@ -38,5 +39,34 @@ export class ScheduleService implements IScheduleService {
         : SCHEDULE_STATUS.OPEN_SEATS,
       currentEnrollmentCount,
     );
+  }
+
+  async findEnrollAvailableSchedule(
+    targetDate: Date,
+    userId: number,
+  ): Promise<AvailableScheduleDto[]> {
+    const disabledScheduleCondition = (schedule: Schedule) => {
+      return (
+        schedule.enrollments.some(
+          (enrollment) => enrollment.userId === userId,
+        ) || schedule.enrollmentCapacity <= schedule.currentEnrollmentCount
+      );
+    };
+
+    const schedules = await this.scheduleRepository.findByDate(targetDate);
+    return schedules.map((schedule) => {
+      return {
+        id: schedule.id,
+        lectureStartedAt: schedule.lectureStartedAt,
+        lectureEndedAt: schedule.lectureEndedAt,
+        enrollmentCapacity: schedule.enrollmentCapacity,
+        enrollmentCount: schedule.currentEnrollmentCount,
+        lecture: {
+          title: schedule.lecture.title,
+          instructor: schedule.lecture.instructor,
+        },
+        disabled: disabledScheduleCondition(schedule),
+      };
+    });
   }
 }
