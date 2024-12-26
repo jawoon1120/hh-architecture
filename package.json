@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prebuild": "rm -rf dist",  
     "build": "nest build && tsc-alias",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -20,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d ./src/infrastructure/typeorm-datasource.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d ./src/infrastructure/typeorm-datasource.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ./src/infrastructure/typeorm-datasource.ts"
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ./src/infrastructure/typeorm-datasource.ts",
+    "migration:create": "typeorm-ts-node-commonjs migration:create"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
