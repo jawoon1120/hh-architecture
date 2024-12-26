@@ -8,6 +8,7 @@ export interface IEnrollmentRepository {
   ): Promise<Enrollment>;
   enroll(enrollment: Enrollment): Promise<Enrollment>;
   findByUserId(userId: number): Promise<Enrollment[]>;
+  findByUserIdWithScheduleAndLecture(userId: number): Promise<Enrollment[]>;
 }
 
 export const ENROLLMENT_REPOSITORY = Symbol('ENROLLMENT_REPOSITORY');

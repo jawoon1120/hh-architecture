@@ -67,4 +67,8 @@ export class EnrollmentService implements IEnrollmentService {
     });
     return this.enrollmentRepository.enroll(enrollment);
   }
+
+  async getEnrollmentsByUserId(userId: number): Promise<Enrollment[]> {
+    return this.enrollmentRepository.findByUserIdWithScheduleAndLecture(userId);
+  }
 }

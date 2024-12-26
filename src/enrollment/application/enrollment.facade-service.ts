@@ -39,4 +39,8 @@ export class EnrollmentFacadeService implements IEnrollmentFacadeService {
     );
     return enrolledEnrollment;
   }
+
+  async getEnrollmentsByUserId(userId: number): Promise<Enrollment[]> {
+    return this.enrollmentService.getEnrollmentsByUserId(userId);
+  }
 }

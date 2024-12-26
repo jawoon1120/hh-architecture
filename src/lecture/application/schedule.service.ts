@@ -8,7 +8,7 @@ import { Schedule } from '../domain/schedule.entity';
 import { SCHEDULE_STATUS } from '../domain/schedule-status.enum';
 
 @Injectable()
-export class LectureService implements IScheduleService {
+export class ScheduleService implements IScheduleService {
   constructor(
     @Inject(SCHDULE_REPOSITORY) private scheduleRepository: IScheduleRepository,
   ) {}

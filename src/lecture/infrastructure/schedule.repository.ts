@@ -5,7 +5,7 @@ import { Schedule } from '../domain/schedule.entity';
 import { SCHEDULE_STATUS } from '../domain/schedule-status.enum';
 
 @Injectable()
-export class LectureRepository
+export class ScheduleRepository
   extends Repository<Schedule>
   implements IScheduleRepository
 {

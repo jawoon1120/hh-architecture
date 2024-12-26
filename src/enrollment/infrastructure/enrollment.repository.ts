@@ -26,4 +26,10 @@ export class EnrollmentRepository
   ): Promise<Enrollment> {
     return this.findOneBy({ scheduleId, userId });
   }
+  findByUserIdWithScheduleAndLecture(userId: number): Promise<Enrollment[]> {
+    return this.find({
+      where: { userId },
+      relations: ['schedule', 'lecture'],
+    });
+  }
 }
