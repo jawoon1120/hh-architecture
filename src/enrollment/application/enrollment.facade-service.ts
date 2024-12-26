@@ -10,7 +10,7 @@ import {
   SCHDULE_SERVICE,
 } from '@src/lecture/application/schedule-service.interface';
 import { IEnrollmentFacadeService } from './interface/enrollment-facade-service.interface';
-import { Transactional } from 'typeorm-transactional';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class EnrollmentFacadeService implements IEnrollmentFacadeService {
@@ -20,24 +20,37 @@ export class EnrollmentFacadeService implements IEnrollmentFacadeService {
 
     @Inject(SCHDULE_SERVICE)
     private scheduleService: IScheduleService,
+
+    private dataSource: DataSource,
   ) {}
 
-  @Transactional()
   async enroll(userId: number, scheduleId: number): Promise<Enrollment> {
-    await this.enrollmentService.validEnrollment(userId, scheduleId);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await this.enrollmentService.validEnrollment(userId, scheduleId);
 
-    const enrolledEnrollment = await this.enrollmentService.enroll(
-      userId,
-      scheduleId,
-    );
+      const enrolledEnrollment = await this.enrollmentService.enroll(
+        userId,
+        scheduleId,
+      );
 
-    const schedule = await this.scheduleService.findById(scheduleId);
+      const schedule = await this.scheduleService.findById(scheduleId);
 
-    await this.scheduleService.updateScheduleStatusAndEnrollmentCount(
-      scheduleId,
-      schedule.currentEnrollmentCount + 1,
-    );
-    return enrolledEnrollment;
+      await this.scheduleService.updateScheduleStatusAndEnrollmentCount(
+        scheduleId,
+        schedule.currentEnrollmentCount + 1,
+      );
+
+      await queryRunner.commitTransaction();
+      return enrolledEnrollment;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async getEnrollmentsByUserId(userId: number): Promise<Enrollment[]> {
