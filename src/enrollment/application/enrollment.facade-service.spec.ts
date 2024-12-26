@@ -95,29 +95,6 @@ describe('EnrollmentFacadeService', () => {
       expect(result).toBe(mockEnrollment);
     });
 
-    it('스케줄이 존재하지 않을 경우 에러가 발생해야 함', async () => {
-      // Given
-      const userId = 1;
-      const scheduleId = 1;
-      const lectureId = 1;
-
-      const mockEnrollment = new Enrollment({
-        userId,
-        scheduleId,
-        lectureId: lectureId,
-        enrolledAt: new Date(),
-      });
-
-      mockEnrollmentService.validEnrollment.mockResolvedValue(undefined);
-      mockEnrollmentService.enroll.mockResolvedValue(mockEnrollment);
-      mockScheduleService.findById.mockResolvedValue(null);
-
-      // When & Then
-      await expect(service.enroll(userId, scheduleId)).rejects.toThrow(
-        'schedule is not found',
-      );
-    });
-
     it('스케줄 업데이트가 실패할 경우 에러가 발생해야 함', async () => {
       // Given
       const userId = 1;

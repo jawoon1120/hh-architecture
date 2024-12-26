@@ -1,7 +1,12 @@
 import { DataSource, Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Enrollment } from '../domain/enrollment.entity';
 import { IEnrollmentRepository } from './enrollment-repository.interface';
+import { Schedule } from '@src/lecture/domain/schedule.entity';
 
 @Injectable()
 export class EnrollmentRepository
@@ -11,14 +16,39 @@ export class EnrollmentRepository
   constructor(private dataSource: DataSource) {
     super(Enrollment, dataSource.createEntityManager());
   }
-  enroll(enrollment: Enrollment): Promise<Enrollment> {
-    return this.save(enrollment);
+  async enroll(enrollment: Enrollment): Promise<Enrollment> {
+    return await this.dataSource.transaction(async (manager) => {
+      // 락을 걸고 스케줄 조회
+      const schedule = await manager.findOne(Schedule, {
+        where: { id: enrollment.scheduleId },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!schedule) {
+        throw new NotFoundException('Schedule not found');
+      }
+
+      // 수강 가능 여부 검증
+      if (schedule.currentEnrollmentCount >= schedule.enrollmentCapacity) {
+        throw new BadRequestException('Schedule is full');
+      }
+      // 수강 인원 증가 및 상태 업데이트
+      schedule.currentEnrollmentCount += 1;
+      await manager.save(schedule);
+
+      // 수강 신청 저장
+      return await manager.save(enrollment);
+    });
   }
+
   findByScheduleId(scheduleId: number): Promise<Enrollment[]> {
     return this.find({ where: { scheduleId } });
   }
+
   findByUserId(userId: number): Promise<Enrollment[]> {
-    return this.find({ where: { userId } });
+    return this.find({
+      where: { userId },
+    });
   }
   findByScheduleIdAndUserId(
     scheduleId: number,

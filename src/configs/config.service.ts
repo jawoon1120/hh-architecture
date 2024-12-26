@@ -47,7 +47,6 @@ export class AppConfigService {
       namingStrategy: new SnakeNamingStrategy(),
       migrationsRun: true,
     };
-
     return dbConfig;
   }
 
@@ -56,6 +55,37 @@ export class AppConfigService {
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         ...this.getTypeOrmModuleOptions(configService),
+      }),
+      inject: [ConfigService],
+    };
+  }
+
+  static getTypeOrmModuleOptionsForTest(
+    configService: ConfigService,
+  ): DataSourceOptions {
+    const dbConfig: DataSourceOptions = {
+      type: 'mysql',
+      host: configService.get<string>('DB_HOST'),
+      port: configService.get<number>('DB_PORT'),
+      username: configService.get<string>('DB_USER'),
+      password: configService.get<string>('DB_PASSWORD'),
+      database: configService.get<string>('DB_NAME'),
+      synchronize: false,
+      logging: true,
+      entities: ['src/**/domain/*.entity.{ts,js}'],
+      migrations: ['src/migrations/**/*{.ts,.js}'],
+      namingStrategy: new SnakeNamingStrategy(),
+      migrationsRun: true,
+    };
+    console.log(dbConfig);
+    return dbConfig;
+  }
+
+  static getTypeOrmModuleConfigsForTest(): TypeOrmModuleAsyncOptions {
+    return {
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        ...this.getTypeOrmModuleOptionsForTest(configService),
       }),
       inject: [ConfigService],
     };

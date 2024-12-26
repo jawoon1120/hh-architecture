@@ -32,7 +32,9 @@ export class ScheduleRepository
   }
 
   async findById(id: number): Promise<Schedule> {
-    return await this.findOneBy({ id });
+    return await this.findOne({
+      where: { id },
+    });
   }
 
   async updateScheduleStatusAndEnrollmentCount(
