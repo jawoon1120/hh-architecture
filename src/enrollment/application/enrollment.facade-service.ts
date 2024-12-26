@@ -25,40 +25,23 @@ export class EnrollmentFacadeService implements IEnrollmentFacadeService {
   ) {}
 
   async enroll(userId: number, scheduleId: number): Promise<Enrollment> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      await this.enrollmentService.validEnrollment(userId, scheduleId);
+    await this.enrollmentService.validEnrollment(userId, scheduleId);
 
-      const addedEnrollment = await this.enrollmentService.enroll(
-        userId,
+    const addedEnrollment = await this.enrollmentService.enroll(
+      userId,
+      scheduleId,
+    );
+
+    const updatedSchedule =
+      await this.scheduleService.updateScheduleStatusAndEnrollmentCount(
         scheduleId,
       );
 
-      const schedule = await this.scheduleService.findById(scheduleId);
-      if (!schedule) {
-        throw new BadRequestException('schedule is not found');
-      }
-
-      const updatedSchedule =
-        await this.scheduleService.updateScheduleStatusAndEnrollmentCount(
-          scheduleId,
-          schedule.currentEnrollmentCount + 1,
-        );
-
-      if (updatedSchedule === 0) {
-        throw new BadRequestException('Update schedule failed');
-      }
-
-      await queryRunner.commitTransaction();
-      return addedEnrollment;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
+    if (updatedSchedule === 0) {
+      throw new BadRequestException('Update schedule failed');
     }
+
+    return addedEnrollment;
   }
 
   async getEnrollmentsByUserId(userId: number): Promise<Enrollment[]> {
