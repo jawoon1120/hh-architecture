@@ -12,9 +12,13 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Module({})
 export class AppConfigService {
+  static getEnvFilePath(): string {
+    return path.join(__dirname, 'env', '.env');
+  }
+
   static getConfigModuleOptions(): ConfigModuleOptions {
     return {
-      envFilePath: path.join(__dirname, 'env', '.env'),
+      envFilePath: this.getEnvFilePath(),
       isGlobal: true,
       validationSchema: Joi.object({
         DB_HOST: Joi.string().required(),
