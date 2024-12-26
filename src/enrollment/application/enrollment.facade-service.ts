@@ -10,6 +10,7 @@ import {
   SCHDULE_SERVICE,
 } from '@src/lecture/application/schedule-service.interface';
 import { IEnrollmentFacadeService } from './interface/enrollment-facade-service.interface';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class EnrollmentFacadeService implements IEnrollmentFacadeService {
@@ -21,7 +22,7 @@ export class EnrollmentFacadeService implements IEnrollmentFacadeService {
     private scheduleService: IScheduleService,
   ) {}
 
-  // TODO: 트랜잭션 처리
+  @Transactional()
   async enroll(userId: number, scheduleId: number): Promise<Enrollment> {
     const isFull = await this.enrollmentService.validScheduleIsFull(scheduleId);
     if (isFull) {

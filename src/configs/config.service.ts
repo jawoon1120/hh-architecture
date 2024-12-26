@@ -7,8 +7,9 @@ import {
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import * as path from 'path';
-import { DataSourceOptions } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 @Module({})
 export class AppConfigService {
@@ -58,6 +59,9 @@ export class AppConfigService {
         ...this.getTypeOrmModuleOptions(configService),
       }),
       inject: [ConfigService],
+      dataSourceFactory: async (options) => {
+        return addTransactionalDataSource(new DataSource(options));
+      },
     };
   }
 }
